@@ -28,10 +28,10 @@ class Bahan extends Model
         return $this->belongsTo(User::class, 'user_id_revisi');
     }
 
-    // public function stok()
-    // {
-    //     return $this->hasMany(Stok::class, 'barang_id');
-    // }
+    public function stok()
+    {
+        return $this->hasMany(Stok::class, 'bahan_id');
+    }
 
     protected function createdAt(): Attribute
     {
