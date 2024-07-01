@@ -6,15 +6,19 @@ use Filament\Forms;
 use App\Models\Stok;
 use Filament\Tables;
 use App\Models\Bahan;
+use App\Models\Gudang;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Livewire\Attributes\Reactive;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use App\Filament\Resources\StokResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\StokResource\RelationManagers;
+use Filament\Forms\Set;
 
 class StokResource extends Resource
 {
@@ -28,18 +32,23 @@ class StokResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('gudang_id')
-                ->relationship('gudang', 'nama_gudang')
-                ->required()
-                ->live(),
                 Forms\Components\Select::make('lokasi_id')
-                ->relationship('lokasi', 'nama_lokasi')
-                ->required()
-                ->live(),
+                    ->relationship('lokasi', 'nama_lokasi')
+                    ->required()
+                    ->afterStateUpdated(function (Set $set) {
+                        $set('gudang_id', null);
+                    })
+                    ->live(),
+                Forms\Components\Select::make('gudang_id')
+                    ->options(fn (Get $get): Collection => Gudang::query()
+                        ->where('lokasi_id', $get('lokasi_id'))
+                        ->pluck('nama_gudang', 'id'))
+                    ->live(),
                 Forms\Components\Select::make('bahan_id')
                     ->label('Bahan')
                     ->required()
                     ->searchable()
+                    ->hidden(fn (callable $get) => !$get('gudang_id') || !$get('lokasi_id'))
                     ->getSearchResultsUsing(function (string $search, callable $get) {
                         $gudangId = $get('gudang_id');
                         $lokasiId = $get('lokasi_id');
@@ -47,11 +56,11 @@ class StokResource extends Resource
                         $results = Bahan::query()
                             ->where(function ($query) use ($search) {
                                 $query->where('nama_bahan', 'like', "%{$search}%")
-                                      ->orWhere('kode_bahan', 'like', "%{$search}%");
+                                    ->orWhere('kode_bahan', 'like', "%{$search}%");
                             })
                             ->whereDoesntHave('stok', function ($query) use ($gudangId, $lokasiId) {
                                 $query->where('gudang_id', $gudangId)
-                                      ->where('lokasi_id', $lokasiId);
+                                    ->where('lokasi_id', $lokasiId);
                             })
                             ->get();
 
@@ -60,7 +69,6 @@ class StokResource extends Resource
                         });
                     })
                     ->getOptionLabelUsing(fn ($value): ?string => Bahan::find($value)?->nama_bahan . ' (' . Bahan::find($value)?->kode_bahan . ')')
-                    ->preload()
             ]);
     }
 

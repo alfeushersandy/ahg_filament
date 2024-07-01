@@ -56,7 +56,7 @@ class BahanResource extends Resource
                     ->formatStateUsing(function ($record) {
                         $userName = $record->userInp ? $record->userInp->name : 'Unknown';
                         $formattedDate = $record->created_at;
-                        return $userName . ' - ' . $formattedDate;
+                        return $userName . ', ' . $formattedDate;
                     })
                     ->html(),
                 Tables\Columns\TextColumn::make('userRev')
@@ -64,7 +64,7 @@ class BahanResource extends Resource
                     ->formatStateUsing(function ($record) {
                         $userName = $record->userRev ? $record->userRev->name : 'Unknown';
                         $formattedDate = $record->tgl_revisi;
-                        return $userName . ' - ' . $formattedDate;
+                        return $userName . ', ' . $formattedDate;
                     })
                     ->html(),
             ])
