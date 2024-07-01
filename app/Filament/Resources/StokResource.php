@@ -78,14 +78,15 @@ class StokResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('gudang.nama_gudang'),
                 Tables\Columns\TextColumn::make('lokasi.nama_lokasi'),
-                Tables\Columns\TextColumn::make('bahan.nama_bahan'),
+                Tables\Columns\TextColumn::make('bahan.nama_bahan')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('jumlah'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                //
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
